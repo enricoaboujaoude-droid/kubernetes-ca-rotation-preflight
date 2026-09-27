@@ -1,0 +1,16 @@
+name: Kubernetes CA Rotation Preflight
+description: Deterministically check old/new certificate chains against current, transition and final trust bundles before CA rotation.
+author: Enrico Abou Jaoude
+inputs:
+  contract:
+    description: Path to a JSON contract containing PEM strings
+    required: true
+outputs:
+  status:
+    description: PASS or BLOCK
+runs:
+  using: node20
+  main: action.mjs
+branding:
+  icon: shield
+  color: blue
