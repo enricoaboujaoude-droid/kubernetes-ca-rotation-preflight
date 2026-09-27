@@ -1,0 +1,1 @@
+{"name":"kubernetes-ca-rotation-preflight","version":"0.1.0","description":"Deterministic offline preflight for Kubernetes CA trust rotation","type":"module","bin":{"k8s-ca-rotation-preflight":"cli.mjs"},"scripts":{"test":"node --test"},"license":"MIT","keywords":["kubernetes","mtls","x509","pki","certificate-rotation","github-actions"]}
