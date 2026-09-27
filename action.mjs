@@ -1,0 +1,2 @@
+import fs from "node:fs"; import {analyze} from "./core.mjs";
+const p=process.env.INPUT_CONTRACT; try{const out=analyze(JSON.parse(fs.readFileSync(p,"utf8")));fs.appendFileSync(process.env.GITHUB_OUTPUT||"/dev/null",`status=${out.status}\n`);console.log(JSON.stringify(out,null,2));if(out.status!=="PASS")process.exitCode=1}catch(e){console.error(e);process.exitCode=2}
