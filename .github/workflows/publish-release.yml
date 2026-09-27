@@ -1,0 +1,59 @@
+name: publish v0.1.0 release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-release.yml
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify deterministic core
+        run: npm test
+
+      - name: Build downloadable artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          npm pack --pack-destination dist
+          git archive \
+            --format=zip \
+            --prefix=kubernetes-ca-rotation-preflight-v0.1.0/ \
+            --output=dist/kubernetes-ca-rotation-preflight-v0.1.0.zip \
+            HEAD
+          (
+            cd dist
+            sha256sum *.tgz *.zip > SHA256SUMS
+          )
+
+      - name: Publish immutable GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v0.1.0 >/dev/null 2>&1; then
+            echo "v0.1.0 already exists; leaving the immutable release unchanged."
+            exit 0
+          fi
+          gh release create v0.1.0 dist/* \
+            --target "$GITHUB_SHA" \
+            --title "Kubernetes CA Rotation Preflight v0.1.0" \
+            --latest \
+            --notes "Deterministic offline preflight for Kubernetes and service-mesh CA rotations. Verify old and new certificate chains across current, dual-trust transition, and final trust bundles before rollout. Includes a zero-dependency CLI, GitHub Action, browser-local interface, canonical JSON/SARIF evidence, safe and incident fixtures, and SHA-256 checksums. No cluster credentials, uploads, private keys, backend, or paid service."
